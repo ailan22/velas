@@ -1,0 +1,270 @@
+{{- /* Portada estilo app. Los datos vienen de data/catalogo.yaml */ -}}
+{{- $c := hugo.Data.catalogo -}}
+{{- $num := $c.whatsapp_numero -}}
+{{- $wa := printf "https://wa.me/%s?text=%s" $num (printf "¡Hola %s! Quiero hacer un pedido 🕯️" $c.nombre | urlquery) -}}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#4b2c33" />
+  <title>{{ site.Title }}</title>
+  <meta name="description" content="{{ site.Params.description }}" />
+  {{ template "_internal/opengraph.html" . }}
+  {{ template "_internal/twitter_cards.html" . }}
+  {{- partial "custom_head.html" . -}}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet" />
+  {{ $css := resources.Get "css/app.css" | resources.Minify | resources.Fingerprint }}
+  <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}" />
+</head>
+<body>
+
+<!-- ===== Barra superior ===== -->
+<header class="topbar">
+  <button class="icon-btn" id="menu-open" aria-label="Abrir menú" aria-controls="drawer" aria-expanded="false">
+    <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  <a href="#inicio" class="brand">
+    {{ partial "app/logo.html" "" }}
+    <span>
+      <strong>{{ $c.nombre }}</strong>
+      <small>— {{ $c.subtitulo }} —</small>
+    </span>
+  </a>
+  <span class="icon-btn candle" aria-hidden="true">
+    {{ partial "app/icon-candle.html" }}
+  </span>
+</header>
+
+<!-- ===== Menú lateral ===== -->
+<div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+<nav class="drawer" id="drawer" aria-label="Menú principal" aria-hidden="true">
+  <div class="drawer-head">
+    {{ partial "app/logo.html" $c.nombre }}
+    <button class="icon-btn" id="menu-close" aria-label="Cerrar menú">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <a href="#inicio">🏠 Inicio</a>
+  <a href="#menu">📋 Catálogo y precios</a>
+  {{ range $c.categorias }}<a href="#menu" class="sub" data-cat="{{ .id }}">{{ .icono }} {{ .nombre }}</a>{{ end }}
+  {{ with $c.galeria }}<a href="#galeria">🖼️ Galería</a>{{ end }}
+  <a href="#contacto">📲 Contacto</a>
+  <button type="button" class="drawer-install" data-install hidden>📲 Instalar app</button>
+  <a href="{{ $wa }}" target="_blank" rel="noopener" class="drawer-cta">Hacer pedido por WhatsApp</a>
+</nav>
+
+<main class="app" id="inicio">
+
+  <!-- Instalar en el celular (solo se muestra en celulares, ver app.js) -->
+  <div class="install" id="install" hidden>
+    {{ partial "app/logo.html" "" }}
+    <div>
+      <strong>{{ $c.nombre }} en tu celular</strong>
+      <small>Tené el catálogo a un toque</small>
+    </div>
+    <button type="button" class="install-btn" data-install>Instalar app</button>
+    <button type="button" class="install-x" id="install-x" aria-label="No mostrar más">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+
+  <!-- Buscador -->
+  <form class="search" role="search" onsubmit="return false">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input type="search" id="buscar" placeholder="Buscar velas, bouquets, regalos…" aria-label="Buscar productos" autocomplete="off" />
+  </form>
+
+  <!-- Carrusel principal -->
+  <section class="hero" aria-roledescription="carrusel">
+    <div class="hero-track" id="hero-track">
+      {{ range $c.hero }}
+      <article class="hero-slide{{ if not .imagen }} no-img{{ end }}">
+        {{ with .imagen }}
+        <img src="{{ partial "app/img.html" (dict "src" . "size" "1200x1200" "fit" true) }}" alt="" loading="lazy" />
+        {{ else }}
+        {{ partial "app/candle-art.html" }}
+        {{ end }}
+        <div class="hero-text">
+          <em>{{ .antetitulo }}</em>
+          <h1>{{ .titulo }}</h1>
+          <p>{{ .texto }}</p>
+          <a class="pill" href="{{ $wa }}" target="_blank" rel="noopener">{{ .boton }} <span aria-hidden="true">➜</span></a>
+        </div>
+      </article>
+      {{ end }}
+    </div>
+    <div class="dots" id="hero-dots">
+      {{ range $i, $_ := $c.hero }}<button aria-label="Ir a la imagen {{ add $i 1 }}"{{ if eq $i 0 }} class="on"{{ end }}></button>{{ end }}
+    </div>
+  </section>
+
+  <!-- Categorías -->
+  <section class="cats" aria-label="Categorías">
+    <button class="cat on" data-cat="todo"><span>✨</span>Todo</button>
+    {{ range $c.categorias }}
+    <button class="cat" data-cat="{{ .id }}"><span>{{ .icono }}</span>{{ .nombre }}</button>
+    {{ end }}
+  </section>
+
+  <!-- Catálogo completo -->
+  <section class="block" id="menu">
+    <div class="block-head">
+      <h2>Catálogo y precios</h2>
+      <div class="menu-tools">
+        <span class="count" id="menu-count"></span>
+        <label class="sort">
+          <select id="ordenar" aria-label="Ordenar por">
+            <option value="">Ordenar por</option>
+            <option value="az">A → Z</option>
+            <option value="za">Z → A</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <ul class="list" id="lista">
+      {{ range $c.productos }}
+      {{ $cat := .categoria }}
+      <li class="item" data-cat="{{ .categoria }}" data-nombre="{{ .nombre | lower }}" data-titulo="{{ .nombre }}" data-opciones="{{ .opciones | jsonify }}">
+        {{ with .imagen }}
+        <img src="{{ partial "app/img.html" (dict "src" . "size" "160x160") }}" alt="" loading="lazy" />
+        {{ else }}
+        <span class="thumb">{{ range where $c.categorias "id" $cat }}{{ .icono }}{{ end }}</span>
+        {{ end }}
+        <div class="item-info">
+          {{ with .etiqueta }}<span class="tag">{{ . }}</span>{{ end }}
+          <h3>{{ .nombre }}</h3>
+          {{ range .opciones }}
+          <p><span>{{ .porcion }}</span><strong>{{ with .precio }}${{ . }}{{ else }}Consultar{{ end }}</strong></p>
+          {{ end }}
+        </div>
+        <button type="button" class="add" aria-label="Agregar {{ .nombre }} al pedido">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </li>
+      {{ end }}
+    </ul>
+    <p class="empty" id="sin-resultados" hidden>No encontramos ese producto 🥲 — ¡escribinos y lo hacemos a medida!</p>
+  </section>
+
+  <!-- Galería -->
+  {{ with $c.galeria }}
+  <section class="block" id="galeria">
+    <div class="block-head"><h2>Galería</h2></div>
+    <p class="lead">Cada vela está hecha a mano, con cera de soja y mucho cariño.</p>
+    <div class="gallery">
+      {{ range . }}
+      <button class="g-item" data-full="{{ partial "app/img.html" (dict "src" . "size" "1200x1600" "fit" true) }}" aria-label="Ampliar foto">
+        <img src="{{ partial "app/img.html" (dict "src" . "size" "360x360") }}" alt="Vela artesanal de {{ $c.nombre }}" loading="lazy" />
+      </button>
+      {{ end }}
+    </div>
+  </section>
+  {{ end }}
+
+  <!-- Contacto -->
+  <section class="block contact" id="contacto">
+    <div class="block-head"><h2>Contacto</h2></div>
+    <p class="lead">Escribinos por WhatsApp para hacer tu pedido, elegir aromas o armar un regalo personalizado.</p>
+    <a class="wa-big" href="{{ $wa }}" target="_blank" rel="noopener">{{ partial "app/icon-wa.html" }} Escribir por WhatsApp</a>
+    <div class="socials">
+      {{ with $c.instagram }}<a href="{{ . }}" target="_blank" rel="noopener" class="ig">Instagram</a>{{ end }}
+      {{ with $c.tiktok }}<a href="{{ . }}" target="_blank" rel="noopener" class="tt">TikTok</a>{{ end }}
+    </div>
+    <p class="muted">🌿 Cera de soja · 🖐️ Hechas a mano · 🎀 Empaquetado de regalo</p>
+    <p class="muted">📦 {{ $c.ubicacion }}</p>
+  </section>
+
+  <footer class="foot">
+    <p>©{{ now.Year }} {{ $c.nombre }} - Velas hechas con ❤️ y cera de soja</p>
+    <p>Desarrollado por <strong>SoftNova</strong></p>
+  </footer>
+</main>
+
+<!-- ===== Barra inferior ===== -->
+<nav class="tabbar" aria-label="Accesos rápidos">
+  <a href="#inicio" class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</a>
+  <a href="#menu"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM9 9h6M9 13h6M9 17h3"/></svg>Catálogo</a>
+  <button type="button" class="tab-cta" id="cart-open" aria-label="Ver mi pedido">{{ partial "app/icon-bag.html" }}<b class="cart-count" id="cart-count" hidden>0</b><span>Mi pedido</span></button>
+  {{ if $c.galeria }}
+  <a href="#galeria"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg>Galería</a>
+  {{ else }}
+  <a href="{{ $c.instagram }}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6"/></svg>Instagram</a>
+  {{ end }}
+  <a href="#contacto"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg>Contacto</a>
+</nav>
+
+<!-- Instrucciones para instalar a mano (iPhone, o Android si el navegador no muestra su aviso) -->
+<div class="install-sheet" id="install-sheet" hidden>
+  <div class="install-card" role="dialog" aria-modal="true" aria-labelledby="install-title">
+    <h2 id="install-title">Instalar {{ $c.nombre }}</h2>
+    <ol data-os="ios" hidden>
+      <li>Tocá el botón <strong>Compartir</strong> <svg viewBox="0 0 24 24" aria-label="Compartir"><path d="M12 3v12M8 7l4-4 4 4M5 12v8h14v-8"/></svg> de Safari.</li>
+      <li>Elegí <strong>Agregar a inicio</strong>.</li>
+      <li>Tocá <strong>Agregar</strong>.</li>
+    </ol>
+    <ol data-os="android" hidden>
+      <li>Tocá el menú <strong>⋮</strong> arriba a la derecha del navegador.</li>
+      <li>Elegí <strong>Instalar app</strong> o <strong>Agregar a pantalla principal</strong>.</li>
+      <li>Confirmá con <strong>Instalar</strong>.</li>
+    </ol>
+    <button type="button" class="pill" id="install-ok">Entendido</button>
+  </div>
+</div>
+
+<!-- Elegir opción de un producto (ej: frasco chico o grande) -->
+<div class="sheet" id="option-sheet" hidden>
+  <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="option-title">
+    <h2 id="option-title"></h2>
+    <p class="muted">Elegí una opción</p>
+    <div class="options" id="option-list"></div>
+  </div>
+</div>
+
+<!-- Carrito: el pedido se envía por WhatsApp o mail, sin pago online -->
+<div class="sheet" id="cart" hidden>
+  <div class="sheet-card cart-card" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+    <div class="cart-head">
+      <h2 id="cart-title">Mi pedido</h2>
+      <button type="button" class="icon-btn" id="cart-close" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="cart-empty" id="cart-empty">Tu pedido está vacío 🕯️<br /><small>Tocá el <strong>+</strong> de un producto para agregarlo.</small></p>
+    <div id="cart-full" hidden>
+      <ul class="cart-list" id="cart-list"></ul>
+      <div class="cart-total"><span>Total</span><strong id="cart-total"></strong></div>
+      <p class="cart-note" id="cart-note" hidden>Los productos marcados "Consultar" se cotizan por mensaje.</p>
+      <form class="cart-form" id="cart-form" onsubmit="return false">
+        <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required /></label>
+        <fieldset>
+          <legend>Entrega</legend>
+          <label class="radio"><input type="radio" name="entrega" value="Envío" checked /> Envío</label>
+          <label class="radio"><input type="radio" name="entrega" value="Retiro" /> Retiro</label>
+        </fieldset>
+        <label data-envio>Dirección y ciudad<input type="text" name="direccion" autocomplete="street-address" /></label>
+        <label>Notas <small>(aroma, color, dedicatoria…)</small><textarea name="notas" rows="2"></textarea></label>
+        <p class="cart-error" id="cart-error" hidden>Escribí tu nombre para enviar el pedido.</p>
+        <button type="button" class="wa-big" id="send-wa">{{ partial "app/icon-wa.html" }} Enviar por WhatsApp</button>
+        {{ with $c.email }}<button type="button" class="mail-btn" id="send-mail">✉️ Enviar por mail</button>{{ end }}
+        <button type="button" class="cart-clear" id="cart-clear">Vaciar pedido</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<!-- Visor de fotos -->
+<div class="lightbox" id="lightbox" hidden>
+  <button class="icon-btn" aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <img alt="Foto ampliada" />
+</div>
+
+{{ $js := resources.Get "js/app.js" | resources.Minify | resources.Fingerprint }}
+<script id="tienda" type="application/json">{{ dict "marca" $c.nombre "whatsapp" $num "email" ($c.email | default "") | jsonify | safeJS }}</script>
+<script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}" defer></script>
+</body>
+</html>

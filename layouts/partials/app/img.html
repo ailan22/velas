@@ -1,0 +1,12 @@
+{{- /* Devuelve la URL de una imagen recortada a .size (ej "400x400").
+       Con "fit" true la escala sin recortar (mantiene la proporción original).
+       Busca primero en assets (procesable); si no existe, usa la de static. */ -}}
+{{- $url := printf "/images/%s" .src -}}
+{{- with resources.Get (printf "images/%s" .src) -}}
+  {{- if $.fit -}}
+    {{- $url = (.Fit (printf "%s webp q80" $.size)).RelPermalink -}}
+  {{- else -}}
+    {{- $url = (.Fill (printf "%s webp q80 Center" $.size)).RelPermalink -}}
+  {{- end -}}
+{{- end -}}
+{{- return $url -}}
