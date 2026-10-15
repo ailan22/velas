@@ -1,0 +1,47 @@
+{{- /* Ilustración de reemplazo mientras no haya foto. Recibe el id de la categoría
+       (frasco, decorativas, bouquet, canasta, regalo); cualquier otro valor dibuja la vela en frasco. */ -}}
+<svg class="art" viewBox="0 0 200 200" aria-hidden="true">
+  <circle class="art-glow" cx="100" cy="92" r="70"/>
+  <ellipse cx="100" cy="178" rx="70" ry="8" fill="#000" opacity=".06"/>
+{{- if eq . "bouquet" }}
+  <path d="M100 176 64 92h72z" fill="#d9c2a3"/>
+  <path d="M100 176 64 92l20 4z" fill="#c9ad88"/>
+  <g stroke="#7f8f74" stroke-width="2.5" stroke-linecap="round"><path d="M100 120 82 70M100 120l2-58M100 120l20-52M100 120 70 86M100 120l32-30"/></g>
+  <g fill="#c99bb0"><circle cx="82" cy="66" r="12"/><circle cx="120" cy="64" r="12"/></g>
+  <g fill="#e6c7d3"><circle cx="102" cy="56" r="13"/><circle cx="68" cy="84" r="10"/><circle cx="133" cy="86" r="10"/></g>
+  <g fill="#b9a6cf"><circle cx="92" cy="80" r="8"/><circle cx="112" cy="82" r="8"/></g>
+  <g fill="#fff8ec"><circle cx="102" cy="56" r="4"/><circle cx="82" cy="66" r="3.5"/><circle cx="120" cy="64" r="3.5"/></g>
+  <path d="M86 128c10 8 18 8 28 0l-14 18z" fill="#a98aa6"/>
+{{- else if eq . "decorativas" }}
+  <ellipse cx="100" cy="164" rx="56" ry="12" fill="#e8ddd0"/>
+  <g fill="#e9c3cc"><ellipse cx="66" cy="132" rx="22" ry="30" transform="rotate(-40 66 132)"/><ellipse cx="134" cy="132" rx="22" ry="30" transform="rotate(40 134 132)"/></g>
+  <g fill="#ddabb8"><ellipse cx="78" cy="118" rx="20" ry="32" transform="rotate(-20 78 118)"/><ellipse cx="122" cy="118" rx="20" ry="32" transform="rotate(20 122 118)"/></g>
+  <ellipse cx="100" cy="114" rx="22" ry="34" fill="#e9c3cc"/>
+  <ellipse cx="100" cy="122" rx="14" ry="20" fill="#d29aa9"/>
+  <path d="M100 100V90" stroke="#3d3a36" stroke-width="2.5" stroke-linecap="round"/>
+  <path class="art-flame" d="M100 90c-7-3-8-11-4-18 2-3 3-7 4-11 3 4 8 9 8 17 0 6-3 10-8 12z" fill="#e9b863"/>
+{{- else if eq . "canasta" }}
+  <g stroke="#7f8f74" stroke-width="2.5" stroke-linecap="round"><path d="M70 110 60 72M130 110l12-40M100 110V62"/></g>
+  <g fill="#e6c7d3"><circle cx="60" cy="68" r="11"/><circle cx="142" cy="66" r="11"/></g>
+  <g fill="#b9a6cf"><circle cx="100" cy="58" r="12"/><circle cx="80" cy="84" r="8"/><circle cx="122" cy="84" r="8"/></g>
+  <rect x="84" y="88" width="32" height="28" rx="4" fill="#f4ece2"/>
+  <path d="M42 108h116l-12 62a8 8 0 0 1-8 6H62a8 8 0 0 1-8-6z" fill="#c9a479"/>
+  <g stroke="#a9865d" stroke-width="2"><path d="M50 126h100M54 144h92M58 162h84"/></g>
+  <path d="M60 108c0-50 80-50 80 0" fill="none" stroke="#a9865d" stroke-width="5"/>
+{{- else if eq . "regalo" }}
+  <path d="M40 96h120v74a6 6 0 0 1-6 6H46a6 6 0 0 1-6-6z" fill="#d9c2a3"/>
+  <rect x="34" y="80" width="132" height="24" rx="4" fill="#e6d4ba"/>
+  <rect x="92" y="80" width="16" height="96" fill="#b9a6cf"/>
+  <path d="M100 80c-16-26-44-20-34-4 6 8 22 6 34 4zM100 80c16-26 44-20 34-4-6 8-22 6-34 4z" fill="#a98aa6"/>
+  <circle cx="100" cy="80" r="7" fill="#9c7187"/>
+  <rect x="120" y="120" width="30" height="20" rx="3" fill="#fff8ec" transform="rotate(-10 135 130)"/>
+{{- else }}
+  <path d="M58 96h84v74a10 10 0 0 1-10 10H68a10 10 0 0 1-10-10z" fill="#8b5a36"/>
+  <rect x="64" y="100" width="8" height="70" rx="4" fill="#fff" opacity=".18"/>
+  <rect x="56" y="88" width="88" height="10" rx="3" fill="#6e4528"/>
+  <rect x="72" y="120" width="56" height="38" rx="3" fill="#f4ece2"/>
+  <path d="M84 134h32M90 144h20" stroke="#b8a48c" stroke-width="2" stroke-linecap="round"/>
+  <path d="M100 88V78" stroke="#3d3a36" stroke-width="2.5" stroke-linecap="round"/>
+  <path class="art-flame" d="M100 78c-8-4-10-13-5-21 2-4 4-8 5-13 3 5 9 10 9 19 0 7-3 12-9 15z" fill="#e9b863"/>
+{{- end }}
+</svg>

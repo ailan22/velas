@@ -1,4 +1,4 @@
-// FisioRelax Velas – interacciones de la portada estilo app
+// FisioRelax Velas – interacciones de la tienda
 (function () {
   "use strict";
 
@@ -24,54 +24,94 @@
   document.getElementById("menu-close").addEventListener("click", function () { setDrawer(false); });
   backdrop.addEventListener("click", function () { setDrawer(false); });
   drawer.querySelectorAll("a").forEach(function (a) {
-    a.addEventListener("click", function () {
-      if (a.dataset.cat) filterCategory(a.dataset.cat);
-      setDrawer(false);
-    });
+    a.addEventListener("click", function () { setDrawer(false); });
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") { setDrawer(false); closeLightbox(); closeInstallSheet(); }
   });
 
-  // ----- Carrusel -----
-  var track = document.getElementById("hero-track");
-  var dots = Array.prototype.slice.call(document.querySelectorAll("#hero-dots button"));
-  var current = 0;
-  var timer;
-
-  function goTo(i) {
-    track.scrollTo({ left: i * track.clientWidth, behavior: "smooth" });
+  // ----- Collage de la portada: las fotos van rotando de a un marco por vez -----
+  var collage = document.getElementById("hero-collage");
+  var fotos = collage ? JSON.parse(collage.dataset.fotos || "[]") : [];
+  var marcos = collage ? Array.prototype.slice.call(collage.querySelectorAll("figure")) : [];
+  var quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (fotos.length > marcos.length && !quieto) {
+    var siguiente = marcos.length;
+    var orden = [1, 0, 2]; // centro, izquierda, derecha
+    var paso = 0;
+    setInterval(function () {
+      if (document.hidden) return;
+      var marco = marcos[orden[paso % orden.length] % marcos.length];
+      paso++;
+      var actual = marco.querySelector("img.on");
+      var nueva = actual.nextElementSibling || actual.previousElementSibling;
+      var src = fotos[siguiente];
+      siguiente = (siguiente + 1) % fotos.length;
+      // Se muestra recién cuando terminó de cargar, para que no aparezca un marco vacío
+      var img = new Image();
+      img.onload = function () {
+        nueva.src = src;
+        nueva.classList.add("on");
+        actual.classList.remove("on");
+      };
+      img.src = src;
+    }, 2600);
   }
-  function restart() {
-    clearInterval(timer);
-    if (dots.length > 1) {
-      timer = setInterval(function () { goTo((current + 1) % dots.length); }, 5000);
-    }
-  }
-  track.addEventListener("scroll", function () {
-    var i = Math.round(track.scrollLeft / track.clientWidth);
-    if (i !== current && dots[i]) {
-      dots[current].classList.remove("on");
-      dots[i].classList.add("on");
-      current = i;
-    }
-  }, { passive: true });
-  track.addEventListener("pointerdown", restart);
-  dots.forEach(function (d, i) {
-    d.addEventListener("click", function () { goTo(i); restart(); });
-  });
-  restart();
 
-  // ----- Categorías y buscador -----
-  var items = Array.prototype.slice.call(document.querySelectorAll("#lista .item"));
-  var cats = Array.prototype.slice.call(document.querySelectorAll(".cat"));
+  // ----- Aparición al hacer scroll -----
+  // Cada grupo aparece escalonado (uno tras otro); sin soporte o con "reducir movimiento" se ve todo directo.
+  if ("IntersectionObserver" in window && !quieto) {
+    var grupos = [
+      ".hero-text > *",
+      ".tiles .tile",
+      ".block-head",
+      ".toolbar",
+      ".grid .pcard",
+      ".perks li",
+      ".gallery .g-item",
+      ".contact-card",
+      ".foot p"
+    ];
+    var revelar = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.classList.add("in");
+        revelar.unobserve(en.target);
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
+    grupos.forEach(function (sel) {
+      document.querySelectorAll(sel).forEach(function (el, i) {
+        el.classList.add("reveal");
+        el.style.setProperty("--d", (i % 4) * 90 + "ms");
+        revelar.observe(el);
+      });
+    });
+    // Lo que está pegado al final de la página nunca llega a "entrar" del todo
+    // (se termina el scroll antes): al llegar abajo se muestra lo que falte.
+    function revelarFinal() {
+      if (window.innerHeight + window.scrollY < document.documentElement.scrollHeight - 40) return;
+      document.querySelectorAll(".reveal:not(.in)").forEach(function (el) {
+        if (el.getBoundingClientRect().top < window.innerHeight) {
+          el.classList.add("in");
+          revelar.unobserve(el);
+        }
+      });
+    }
+    window.addEventListener("scroll", revelarFinal, { passive: true });
+    window.addEventListener("resize", revelarFinal);
+    revelarFinal();
+  }
+
+  // ----- Categorías, buscador y orden del catálogo -----
+  var items = Array.prototype.slice.call(document.querySelectorAll("#lista .pcard"));
+  var chips = Array.prototype.slice.call(document.querySelectorAll(".chip"));
   var search = document.getElementById("buscar");
   var empty = document.getElementById("sin-resultados");
   var count = document.getElementById("menu-count");
   var activeCat = "todo";
 
   function normalize(s) {
-    return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
   items.forEach(function (it) { it.dataset.key = normalize(it.dataset.nombre); });
 
@@ -105,40 +145,43 @@
 
   function filterCategory(cat) {
     activeCat = cat;
-    cats.forEach(function (c) { c.classList.toggle("on", c.dataset.cat === cat); });
+    if (search.value) search.value = "";
+    chips.forEach(function (c) { c.classList.toggle("on", c.dataset.cat === cat); });
     apply();
   }
 
-  cats.forEach(function (c) {
-    c.addEventListener("click", function () {
-      filterCategory(c.dataset.cat);
-      document.getElementById("menu").scrollIntoView();
-    });
+  chips.forEach(function (c) {
+    c.addEventListener("click", function () { filterCategory(c.dataset.cat); });
+  });
+  // Enlaces que filtran el catálogo (menú, portada, tarjetas de categorías)
+  document.querySelectorAll("a[data-cat]").forEach(function (a) {
+    a.addEventListener("click", function () { filterCategory(a.dataset.cat); });
   });
 
   search.addEventListener("input", function () {
-    if (search.value && activeCat !== "todo") filterCategory("todo");
-    else apply();
+    if (search.value && activeCat !== "todo") {
+      activeCat = "todo";
+      chips.forEach(function (c) { c.classList.toggle("on", c.dataset.cat === "todo"); });
+    }
+    apply();
   });
   search.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") {
-      search.blur();
-      document.getElementById("menu").scrollIntoView();
-    }
+    if (e.key === "Enter") search.blur();
   });
   apply();
 
-  // ----- Barra inferior: marcar sección visible -----
-  var tabs = Array.prototype.slice.call(document.querySelectorAll(".tabbar a[href^='#']"));
+  // ----- Menú de arriba: marcar sección visible -----
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll(".nav a"));
+  function markNav(id) {
+    navLinks.forEach(function (a) { a.classList.toggle("on", a.getAttribute("href") === "#" + id && !a.dataset.cat); });
+  }
   if ("IntersectionObserver" in window) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
-        if (!en.isIntersecting) return;
-        var id = en.target.id === "destacados" ? "inicio" : en.target.id;
-        tabs.forEach(function (t) { t.classList.toggle("on", t.getAttribute("href") === "#" + id); });
+        if (en.isIntersecting) markNav(en.target.id === "favoritos" || en.target.id === "galeria" ? "inicio" : en.target.id);
       });
     }, { rootMargin: "-45% 0px -50% 0px" });
-    ["destacados", "menu", "galeria", "contacto"].forEach(function (id) {
+    ["inicio", "favoritos", "catalogo", "galeria", "contacto"].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) io.observe(el);
     });
@@ -147,11 +190,37 @@
   // ----- Visor de fotos -----
   var lightbox = document.getElementById("lightbox");
   var lightImg = lightbox.querySelector("img");
-  function closeLightbox() { lightbox.hidden = true; lightImg.removeAttribute("src"); }
-  document.querySelectorAll(".g-item").forEach(function (b) {
+  var lightCap = lightbox.querySelector("figcaption");
+  var lightFig = lightbox.querySelector("figure");
+  var lightFrom = null;
+  function closeLightbox() {
+    if (lightbox.hidden) return;
+    lightbox.classList.remove("show");
+    document.body.classList.remove("no-scroll");
+    setTimeout(function () { lightbox.hidden = true; lightImg.removeAttribute("src"); }, 200);
+    if (lightFrom) lightFrom.focus();
+  }
+  // Galería y fotos de las tarjetas del catálogo
+  document.querySelectorAll(".g-item, .pcard-zoom").forEach(function (b) {
     b.addEventListener("click", function () {
+      lightFrom = b;
       lightImg.src = b.dataset.full;
+      lightImg.alt = b.dataset.caption || "Foto ampliada";
+      // Desde una tarjeta del catálogo se muestra como tarjeta: foto, nombre y precio
+      var card = b.closest(".pcard");
+      lightFig.classList.toggle("pcard", !!card);
+      lightCap.textContent = "";
+      if (card) {
+        lightCap.appendChild(card.querySelector("h3").cloneNode(true));
+        lightCap.appendChild(card.querySelector(".price").cloneNode(true));
+      } else {
+        lightCap.textContent = b.dataset.caption || "";
+      }
+      lightCap.hidden = !card && !b.dataset.caption;
       lightbox.hidden = false;
+      document.body.classList.add("no-scroll");
+      requestAnimationFrame(function () { lightbox.classList.add("show"); });
+      lightbox.querySelector(".icon-btn").focus();
     });
   });
   lightbox.addEventListener("click", closeLightbox);
@@ -238,6 +307,7 @@
   var cartSheet = document.getElementById("cart");
   var optionSheet = document.getElementById("option-sheet");
   var list = document.getElementById("cart-list");
+  var icoBasura = document.getElementById("ico-basura").innerHTML;
   var countEl = document.getElementById("cart-count");
   var totalEl = document.getElementById("cart-total");
   var form = document.getElementById("cart-form");
@@ -255,10 +325,10 @@
   function money(n) { return "$" + n.toLocaleString("es-UY"); }
   function price(p) { var n = parseFloat(p); return isNaN(n) ? null : n; }
 
-  function add(nombre, op) {
+  function add(nombre, op, n) {
     var line = cart.filter(function (l) { return l.nombre === nombre && l.porcion === op.porcion; })[0];
-    if (line) line.cant++;
-    else cart.push({ nombre: nombre, porcion: op.porcion, precio: price(op.precio), cant: 1 });
+    if (line) line.cant += n;
+    else cart.push({ nombre: nombre, porcion: op.porcion, precio: price(op.precio), cant: n });
     save();
     render();
     showToast("Agregado al pedido ✓  Ver");
@@ -310,7 +380,8 @@
           "<span>" + l.cant + "</span>" +
           '<button type="button" data-i="' + i + '" data-d="1" aria-label="Agregar uno">+</button>' +
         "</div>" +
-        '<b class="cl-price">' + (l.precio === null ? "Consultar" : money(l.precio * l.cant)) + "</b>";
+        '<b class="cl-price">' + (l.precio === null ? "Consultar" : money(l.precio * l.cant)) + "</b>" +
+        '<button type="button" class="cl-del" data-i="' + i + '" data-del aria-label="Eliminar del pedido">' + icoBasura + "</button>";
       li.querySelector("strong").textContent = l.nombre;
       li.querySelector("small").textContent = l.porcion;
       list.appendChild(li);
@@ -321,18 +392,28 @@
     var b = e.target.closest("button[data-i]");
     if (!b) return;
     var l = cart[+b.dataset.i];
-    l.cant += +b.dataset.d;
+    if (b.hasAttribute("data-del")) l.cant = 0;
+    else l.cant += +b.dataset.d;
     if (l.cant <= 0) cart.splice(+b.dataset.i, 1);
     save();
     render();
   });
 
-  // Botón "+" de cada producto: si tiene varias opciones, se elige una primero
-  document.querySelectorAll("#lista .item").forEach(function (it) {
+  // Cada tarjeta: contador de cantidad y "Agregar" (si hay varias opciones, se elige una primero)
+  document.querySelectorAll(".pcard").forEach(function (it) {
     var nombre = it.dataset.titulo;
     var opciones = JSON.parse(it.dataset.opciones || "[]");
+    var qtyEl = it.querySelector("[data-qty] span");
+    var qty = 1;
+    function setQty(n) { qty = Math.max(1, Math.min(99, n)); qtyEl.textContent = qty; }
+
+    it.querySelector("[data-qty]").addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-d]");
+      if (b) setQty(qty + +b.dataset.d);
+    });
     it.querySelector(".add").addEventListener("click", function () {
-      if (opciones.length === 1) { add(nombre, opciones[0]); return; }
+      var n = qty;
+      if (opciones.length === 1) { add(nombre, opciones[0], n); setQty(1); return; }
       document.getElementById("option-title").textContent = nombre;
       var box = document.getElementById("option-list");
       box.textContent = "";
@@ -341,9 +422,9 @@
         b.type = "button";
         b.className = "option";
         b.innerHTML = "<span></span><strong></strong>";
-        b.querySelector("span").textContent = op.porcion;
-        b.querySelector("strong").textContent = price(op.precio) === null ? "Consultar" : money(price(op.precio));
-        b.addEventListener("click", function () { optionSheet.hidden = true; add(nombre, op); });
+        b.querySelector("span").textContent = (n > 1 ? n + " × " : "") + op.porcion;
+        b.querySelector("strong").textContent = price(op.precio) === null ? "Consultar" : money(price(op.precio) * n);
+        b.addEventListener("click", function () { optionSheet.hidden = true; add(nombre, op, n); setQty(1); });
         box.appendChild(b);
       });
       optionSheet.hidden = false;

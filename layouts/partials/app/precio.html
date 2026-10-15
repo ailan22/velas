@@ -1,0 +1,2 @@
+{{- /* Formatea un precio al estilo uruguayo: 1150 → "$1.150" */ -}}
+{{- return printf "$%s" (lang.FormatNumberCustom 0 . "- , .") -}}

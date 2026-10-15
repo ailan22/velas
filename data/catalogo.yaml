@@ -1,10 +1,12 @@
-# Catálogo de la portada estilo app (layouts/index.html).
+# Catálogo de la portada (layouts/index.html).
 # Para cambiar precios, productos o fotos, editá este archivo.
 # Las imágenes se buscan en assets/images o static/images.
-# Si un producto o slide no tiene "imagen", se muestra un ícono / ilustración de vela.
+# Si un producto, la portada o una tarjeta no tiene "imagen", se muestra una ilustración.
 
 nombre: "FisioRelax"
-subtitulo: "Velas artesanales"
+subtitulo: "Velas & regalos"
+# Texto de la franja verde de arriba de todo.
+anuncio: "Envíos a todo Uruguay · Hecho a mano con amor"
 
 # Número de WhatsApp con código de país y sin "+" ni espacios.
 # PRUEBA: número de test. El de FisioRelax es "59896023275" (volver a ponerlo antes de publicar).
@@ -12,25 +14,44 @@ whatsapp_numero: "59894799770"
 # Mail para recibir pedidos desde el carrito. Si está vacío, no se muestra el botón "Enviar por mail".
 email: ""
 instagram: "https://www.instagram.com/fisiorelax_velas/"
+facebook: "https://www.facebook.com/profile.php?id=61591755021159"
 # tiktok: ""
 ubicacion: "Envíos a todo Uruguay 🇺🇾"
 
+# Portada. "imagen": una foto horizontal (ideal 1600x1000) en assets/images.
+# O "imagenes": fotos verticales (3:4) para el collage. Se ven de a 3 y van rotando solas;
+# cuantas más haya, más variedad. Sin ninguna = ilustración.
 hero:
-  - imagen: ""
-    antetitulo: "Cera de soja"
-    titulo: "Velas artesanales"
-    texto: "Hechas a mano, una por una, para llenar tu espacio de calma 🌸"
-    boton: "Hacer pedido"
-  - imagen: ""
-    antetitulo: "Hechas para sorprender"
-    titulo: "Bouquets y regalos"
-    texto: "Regalos personalizados para cumpleaños, aniversarios y fechas especiales 🎁"
-    boton: "Consultar"
-  - imagen: ""
-    antetitulo: "Envíos a todo Uruguay"
-    titulo: "Canastas florales"
-    texto: "Velas, flores y detalles en una canasta lista para regalar ✨"
-    boton: "Pedir ahora"
+  imagen: ""
+  imagenes:
+    - "fotos/portada-1.jpg"
+    - "fotos/portada-2.jpg"
+    - "fotos/portada-3.jpg"
+    - "fotos/portada-4.jpg"
+    - "fotos/portada-5.jpg"
+    - "fotos/portada-6.jpg"
+    - "fotos/portada-7.jpg"
+    - "fotos/portada-8.jpg"
+    - "fotos/portada-9.jpg"
+    - "fotos/portada-10.jpg"
+    - "fotos/portada-11.jpg"
+  titulo: "Pequeños rituales, grandes momentos"
+  texto: "Velas artesanales de cera de soja y regalos pensados para regalar calma."
+  boton: "Explorar catálogo"
+  enlace: "Armar un regalo"
+
+# Sección de contacto.
+contacto:
+  etiqueta: "Un detalle único"
+  titulo: "¿Querés un regalo a medida?"
+  texto: "Contanos tu idea y creamos un regalo especial, pensado para sorprender."
+  boton: "Armá tu regalo por WhatsApp"
+
+# Las tres tarjetas grandes debajo de la portada. "categoria" es el id de abajo.
+destacadas:
+  - { titulo: "Decorativas", categoria: decorativas, imagen: "fotos/mascotas.jpg" }
+  - { titulo: "Bouquets & flores", categoria: bouquet, imagen: "fotos/cat-bouquets.jpg" }
+  - { titulo: "Regalos especiales", categoria: regalo, imagen: "fotos/cat-regalos.jpg" }
 
 categorias:
   - id: frasco
@@ -49,28 +70,35 @@ categorias:
     nombre: "Regalos"
     icono: "🎁"
 
-# etiqueta: (opcional) texto destacado arriba del nombre en el menú.
+# etiqueta: (opcional) texto destacado sobre la foto del producto.
+# favorito: true lo muestra en "Favoritos hechos a mano" (ideal: 4 productos).
+# imagen: (opcional) foto cuadrada en assets/images.
 # precio: número, o vacío para mostrar "Consultar".
 # PRUEBA: productos y precios ficticios para probar el carrito. Reemplazar por los reales.
 productos:
   # --- Frascos ---
   - nombre: "Vela en frasco · Vainilla"
+    imagen: "fotos/vainilla.jpg"
+    favorito: true
     categoria: frasco
     etiqueta: "Más vendida"
     opciones:
       - { porcion: "Frasco chico (120 g)", precio: 390 }
       - { porcion: "Frasco grande (220 g)", precio: 650 }
   - nombre: "Vela en frasco · Lavanda"
+    imagen: "fotos/lavanda.jpg"
     categoria: frasco
     opciones:
       - { porcion: "Frasco chico (120 g)", precio: 390 }
       - { porcion: "Frasco grande (220 g)", precio: 650 }
   - nombre: "Vela en frasco · Coco y limón"
+    imagen: "fotos/coco-limon.jpg"
     categoria: frasco
     opciones:
       - { porcion: "Frasco chico (120 g)", precio: 390 }
       - { porcion: "Frasco grande (220 g)", precio: 650 }
   - nombre: "Vela en lata de viaje"
+    imagen: "fotos/lata.jpg"
     categoria: frasco
     etiqueta: "Nueva"
     opciones:
@@ -78,19 +106,24 @@ productos:
 
   # --- Decorativas ---
   - nombre: "Vela burbuja"
+    imagen: "fotos/burbuja.jpg"
     categoria: decorativas
     opciones:
       - { porcion: "1 unidad", precio: 250 }
       - { porcion: "Pack x3", precio: 690 }
   - nombre: "Vela flor de peonía"
+    imagen: "fotos/peonia.jpg"
+    favorito: true
     categoria: decorativas
     opciones:
       - { porcion: "1 unidad", precio: 320 }
-  - nombre: "Vela torso"
+  - nombre: "Velas mascotas"
+    imagen: "fotos/mascotas.jpg"
     categoria: decorativas
     opciones:
       - { porcion: "1 unidad", precio: 450 }
   - nombre: "Vela calabaza"
+    imagen: "fotos/calabaza.jpg"
     categoria: decorativas
     etiqueta: "Edición limitada"
     opciones:
@@ -98,43 +131,53 @@ productos:
 
   # --- Bouquets ---
   - nombre: "Bouquet de rosas de cera"
+    imagen: "fotos/bouquet-rosas.jpg"
+    favorito: true
     categoria: bouquet
     etiqueta: "Ideal para regalar"
     opciones:
       - { porcion: "6 rosas", precio: 890 }
       - { porcion: "12 rosas", precio: 1590 }
   - nombre: "Bouquet mixto con vela en frasco"
+    imagen: "fotos/bouquet-mixto.jpg"
     categoria: bouquet
     opciones:
       - { porcion: "1 bouquet", precio: 1250 }
 
   # --- Canastas ---
   - nombre: "Canasta floral chica"
+    imagen: "fotos/canasta-chica.jpg"
     categoria: canasta
     opciones:
       - { porcion: "2 velas + flores secas", precio: 1390 }
   - nombre: "Canasta floral grande"
+    imagen: "fotos/canasta-grande.jpg"
     categoria: canasta
     opciones:
       - { porcion: "4 velas + flores + difusor", precio: 2490 }
 
   # --- Regalos ---
   - nombre: "Box regalo relax"
+    imagen: "fotos/box-relax.jpg"
+    favorito: true
     categoria: regalo
     etiqueta: "Favorito"
     opciones:
       - { porcion: "Vela + sales de baño + tarjeta", precio: 1150 }
   - nombre: "Souvenirs para eventos"
+    imagen: "fotos/souvenirs.jpg"
     categoria: regalo
     opciones:
       - { porcion: "Pack x10 velitas", precio: 1800 }
       - { porcion: "Pack x25 velitas", precio: 4200 }
   - nombre: "Regalo personalizado"
+    imagen: "fotos/personalizado.jpg"
     categoria: regalo
     etiqueta: "A pedido"
     opciones:
       - { porcion: "Contanos tu idea", precio: "" }
   - nombre: "Empaquetado de regalo"
+    imagen: "fotos/empaquetado.jpg"
     categoria: regalo
     opciones:
       - { porcion: "Caja + moño + tarjeta", precio: 120 }

@@ -1,0 +1,31 @@
+{{- /* Tarjeta de producto con cantidad y botón "Agregar". Recibe el producto. */ -}}
+{{- $precios := slice -}}
+{{- range .opciones }}{{ with .precio }}{{ $precios = $precios | append . }}{{ end }}{{ end -}}
+<li class="pcard" data-cat="{{ .categoria }}" data-nombre="{{ .nombre | lower }}" data-titulo="{{ .nombre }}" data-opciones="{{ .opciones | jsonify }}">
+  <div class="pcard-img">
+    {{ with .imagen }}
+    <button type="button" class="pcard-zoom" data-full="{{ partial "app/img.html" (dict "src" . "size" "900x900" "fit" true) }}" data-caption="{{ $.nombre }}" aria-label="Ver foto de {{ $.nombre }}">
+      <img src="{{ partial "app/img.html" (dict "src" . "size" "480x480") }}" alt="{{ $.nombre }}" loading="lazy" />
+    </button>
+    {{ else }}
+    {{ partial "app/art.html" .categoria }}
+    {{ end }}
+    {{ with .etiqueta }}<span class="tag">{{ . }}</span>{{ end }}
+  </div>
+  <div class="pcard-body">
+    <h3>{{ .nombre }}</h3>
+    <p class="price">
+      {{- if not $precios -}}Consultar
+      {{- else if gt (len .opciones) 1 -}}<small>Desde</small> {{ partial "app/precio.html" (math.Min $precios) }}
+      {{- else -}}{{ partial "app/precio.html" (index $precios 0) }}{{- end -}}
+    </p>
+    <div class="buy">
+      <div class="qty" data-qty>
+        <button type="button" data-d="-1" aria-label="Uno menos">−</button>
+        <span>1</span>
+        <button type="button" data-d="1" aria-label="Uno más">+</button>
+      </div>
+      <button type="button" class="add" aria-label="Agregar {{ .nombre }} al pedido">{{ partial "app/icon.html" "carrito" }}Agregar</button>
+    </div>
+  </div>
+</li>

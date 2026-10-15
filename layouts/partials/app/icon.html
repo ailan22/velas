@@ -1,0 +1,28 @@
+{{- /* Íconos de línea. Uso: partial "app/icon.html" "hoja" */ -}}
+<svg viewBox="0 0 24 24" class="ico ico-{{ . }}" aria-hidden="true">
+{{- if eq . "hoja" -}}
+  <path d="M4 20C8 16 12 11 19 4"/><path d="M8 16c-3-1-4-4-3-7 3 0 5 2 3 7zM11.5 12.5c-1-3 0-6 3-7 1 3 0 5.5-3 7zM8 16c1 3 4 4 7 3 0-3-2-5-7-3zM11.5 12.5c3 1 6 0 7-3-3-1-5.5 0-7 3z"/>
+{{- else if eq . "flecha" -}}
+  <path d="M5 12h14M13 6l6 6-6 6"/>
+{{- else if eq . "carrito" -}}
+  <path d="M3 4h2l2.4 11h10.2L20 7H6.2"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/>
+{{- else if eq . "corazon" -}}
+  <path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/>
+{{- else if eq . "regalo" -}}
+  <rect x="4" y="9" width="16" height="4" rx="1"/><path d="M5.5 13v7h13v-7M12 9v11M12 9c-1.5-3-5-4-5.5-2S9 9 12 9zM12 9c1.5-3 5-4 5.5-2S15 9 12 9z"/>
+{{- else if eq . "camion" -}}
+  <path d="M2.5 6h11v10h-11zM13.5 9.5h4l3 3.5v3h-7"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>
+{{- else if eq . "menu" -}}
+  <path d="M4 7h16M4 12h16M4 17h16"/>
+{{- else if eq . "cerrar" -}}
+  <path d="M6 6l12 12M18 6L6 18"/>
+{{- else if eq . "instagram" -}}
+  <rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".6"/>
+{{- else if eq . "facebook" -}}
+  <path d="M15 3.5h-2.2A3.8 3.8 0 0 0 9 7.3V10H6.5v3.5H9v7h3.5v-7h2.7l.6-3.5h-3.3V7.6c0-.6.4-.9.9-.9H15z"/>
+{{- else if eq . "basura" -}}
+  <path d="M4 7h16M9.5 7V4.8c0-.4.4-.8.8-.8h3.4c.4 0 .8.4.8.8V7M6 7l1 12.2c.1.9.8 1.6 1.7 1.6h6.6c.9 0 1.6-.7 1.7-1.6L18 7M10 11v6M14 11v6"/>
+{{- else if eq . "buscar" -}}
+  <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+{{- end -}}
+</svg>

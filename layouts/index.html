@@ -1,13 +1,14 @@
-{{- /* Portada estilo app. Los datos vienen de data/catalogo.yaml */ -}}
+{{- /* Portada de la tienda. Los datos vienen de data/catalogo.yaml */ -}}
 {{- $c := hugo.Data.catalogo -}}
 {{- $num := $c.whatsapp_numero -}}
 {{- $wa := printf "https://wa.me/%s?text=%s" $num (printf "¡Hola %s! Quiero hacer un pedido 🕯️" $c.nombre | urlquery) -}}
+{{- $h := $c.hero -}}
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#4b2c33" />
+  <meta name="theme-color" content="#6f7c67" />
   <title>{{ site.Title }}</title>
   <meta name="description" content="{{ site.Params.description }}" />
   {{ template "_internal/opengraph.html" . }}
@@ -15,145 +16,171 @@
   {{- partial "custom_head.html" . -}}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=Mulish:wght@400;500;600;700&family=Sacramento&display=swap" rel="stylesheet" />
   {{ $css := resources.Get "css/app.css" | resources.Minify | resources.Fingerprint }}
   <link rel="stylesheet" href="{{ $css.RelPermalink }}" integrity="{{ $css.Data.Integrity }}" />
 </head>
 <body>
 
-<!-- ===== Barra superior ===== -->
-<header class="topbar">
-  <button class="icon-btn" id="menu-open" aria-label="Abrir menú" aria-controls="drawer" aria-expanded="false">
-    <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-  </button>
-  <a href="#inicio" class="brand">
-    {{ partial "app/logo.html" "" }}
-    <span>
-      <strong>{{ $c.nombre }}</strong>
-      <small>— {{ $c.subtitulo }} —</small>
-    </span>
-  </a>
-  <span class="icon-btn candle" aria-hidden="true">
-    {{ partial "app/icon-candle.html" }}
-  </span>
-</header>
+<!-- ===== Franja de aviso ===== -->
+{{ with $c.anuncio }}
+<div class="announce">{{ partial "app/icon.html" "hoja" }}<span>{{ . }}</span>{{ partial "app/icon.html" "hoja" }}</div>
+{{ end }}
 
-<!-- ===== Menú lateral ===== -->
-<div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
-<nav class="drawer" id="drawer" aria-label="Menú principal" aria-hidden="true">
-  <div class="drawer-head">
-    {{ partial "app/logo.html" $c.nombre }}
-    <button class="icon-btn" id="menu-close" aria-label="Cerrar menú">
-      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+<!-- ===== Encabezado ===== -->
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <button class="icon-btn menu-btn" id="menu-open" aria-label="Abrir menú" aria-controls="drawer" aria-expanded="false">{{ partial "app/icon.html" "menu" }}</button>
+    <a href="#inicio" class="brand">
+      {{ partial "app/logo.html" "" }}
+      <span>
+        <strong>{{ $c.nombre }}</strong>
+        <small>{{ $c.subtitulo }}</small>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Principal">
+      <a href="#inicio" class="on">Inicio</a>
+      <a href="#catalogo">Catálogo</a>
+      <!-- <a href="#catalogo" data-cat="bouquet">Bouquets</a> -->
+      <!-- <a href="#catalogo" data-cat="regalo">Regalos</a> -->
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <button type="button" class="icon-btn cart-btn" id="cart-open" aria-label="Ver mi pedido">
+      {{ partial "app/icon-bag.html" }}<b class="cart-count" id="cart-count" hidden>0</b>
     </button>
   </div>
-  <a href="#inicio">🏠 Inicio</a>
-  <a href="#menu">📋 Catálogo y precios</a>
-  {{ range $c.categorias }}<a href="#menu" class="sub" data-cat="{{ .id }}">{{ .icono }} {{ .nombre }}</a>{{ end }}
-  {{ with $c.galeria }}<a href="#galeria">🖼️ Galería</a>{{ end }}
-  <a href="#contacto">📲 Contacto</a>
-  <button type="button" class="drawer-install" data-install hidden>📲 Instalar app</button>
+</header>
+
+<!-- ===== Menú lateral (celulares) ===== -->
+<div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+<nav class="drawer" id="drawer" aria-label="Menú" aria-hidden="true">
+  <div class="drawer-head">
+    {{ partial "app/logo.html" $c.nombre }}
+    <button class="icon-btn" id="menu-close" aria-label="Cerrar menú">{{ partial "app/icon.html" "cerrar" }}</button>
+  </div>
+  <a href="#inicio">Inicio</a>
+  <a href="#catalogo" data-cat="todo">Catálogo</a>
+  {{ range $c.categorias }}<a href="#catalogo" class="sub" data-cat="{{ .id }}">{{ .nombre }}</a>{{ end }}
+  {{ with $c.galeria }}<a href="#galeria">Galería</a>{{ end }}
+  <a href="#contacto">Contacto</a>
+  <button type="button" class="drawer-install" data-install hidden>Instalar app</button>
   <a href="{{ $wa }}" target="_blank" rel="noopener" class="drawer-cta">Hacer pedido por WhatsApp</a>
 </nav>
 
-<main class="app" id="inicio">
+<main id="inicio">
 
   <!-- Instalar en el celular (solo se muestra en celulares, ver app.js) -->
-  <div class="install" id="install" hidden>
-    {{ partial "app/logo.html" "" }}
-    <div>
-      <strong>{{ $c.nombre }} en tu celular</strong>
-      <small>Tené el catálogo a un toque</small>
+  <div class="wrap">
+    <div class="install" id="install" hidden>
+      {{ partial "app/logo.html" "" }}
+      <div>
+        <strong>{{ $c.nombre }} en tu celular</strong>
+        <small>Tené el catálogo a un toque</small>
+      </div>
+      <button type="button" class="install-btn" data-install>Instalar</button>
+      <button type="button" class="install-x" id="install-x" aria-label="No mostrar más">{{ partial "app/icon.html" "cerrar" }}</button>
     </div>
-    <button type="button" class="install-btn" data-install>Instalar app</button>
-    <button type="button" class="install-x" id="install-x" aria-label="No mostrar más">
-      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
-    </button>
   </div>
 
-  <!-- Buscador -->
-  <form class="search" role="search" onsubmit="return false">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-    <input type="search" id="buscar" placeholder="Buscar velas, bouquets, regalos…" aria-label="Buscar productos" autocomplete="off" />
-  </form>
-
-  <!-- Carrusel principal -->
-  <section class="hero" aria-roledescription="carrusel">
-    <div class="hero-track" id="hero-track">
-      {{ range $c.hero }}
-      <article class="hero-slide{{ if not .imagen }} no-img{{ end }}">
-        {{ with .imagen }}
-        <img src="{{ partial "app/img.html" (dict "src" . "size" "1200x1200" "fit" true) }}" alt="" loading="lazy" />
-        {{ else }}
-        {{ partial "app/candle-art.html" }}
-        {{ end }}
-        <div class="hero-text">
-          <em>{{ .antetitulo }}</em>
-          <h1>{{ .titulo }}</h1>
-          <p>{{ .texto }}</p>
-          <a class="pill" href="{{ $wa }}" target="_blank" rel="noopener">{{ .boton }} <span aria-hidden="true">➜</span></a>
-        </div>
-      </article>
+  <!-- Portada -->
+  <section class="hero{{ if $h.imagen }} has-img{{ end }}">
+    <div class="hero-media">
+      {{ with $h.imagen }}
+      <img src="{{ partial "app/img.html" (dict "src" . "size" "1600x1000" "fit" true) }}" alt="" />
+      {{ else with $h.imagenes }}
+      {{ $fotos := slice }}
+      {{ range . }}{{ $fotos = $fotos | append (partial "app/img.html" (dict "src" . "size" "480x640")) }}{{ end }}
+      <div class="hero-collage" id="hero-collage" data-fotos="{{ $fotos | jsonify }}">
+        {{ range first 3 $fotos }}<figure><img class="on" src="{{ . }}" alt="" /><img alt="" /></figure>{{ end }}
+      </div>
+      {{ else }}
+      <div class="hero-art">
+        {{ partial "app/art.html" "bouquet" }}
+        {{ partial "app/art.html" "frasco" }}
+        {{ partial "app/art.html" "regalo" }}
+      </div>
       {{ end }}
     </div>
-    <div class="dots" id="hero-dots">
-      {{ range $i, $_ := $c.hero }}<button aria-label="Ir a la imagen {{ add $i 1 }}"{{ if eq $i 0 }} class="on"{{ end }}></button>{{ end }}
-    </div>
-  </section>
-
-  <!-- Categorías -->
-  <section class="cats" aria-label="Categorías">
-    <button class="cat on" data-cat="todo"><span>✨</span>Todo</button>
-    {{ range $c.categorias }}
-    <button class="cat" data-cat="{{ .id }}"><span>{{ .icono }}</span>{{ .nombre }}</button>
-    {{ end }}
-  </section>
-
-  <!-- Catálogo completo -->
-  <section class="block" id="menu">
-    <div class="block-head">
-      <h2>Catálogo y precios</h2>
-      <div class="menu-tools">
-        <span class="count" id="menu-count"></span>
-        <label class="sort">
-          <select id="ordenar" aria-label="Ordenar por">
-            <option value="">Ordenar por</option>
-            <option value="az">A → Z</option>
-            <option value="za">Z → A</option>
-          </select>
-        </label>
+    <div class="wrap hero-in">
+      <div class="hero-text">
+        {{ partial "app/icon.html" "hoja" }}
+        <h1>{{ $h.titulo }}</h1>
+        <p>{{ $h.texto }}</p>
+        <div class="hero-actions">
+          <a class="btn" href="#catalogo" data-cat="todo">{{ $h.boton }} {{ partial "app/icon.html" "flecha" }}</a>
+          
+        </div>
       </div>
     </div>
-    <ul class="list" id="lista">
-      {{ range $c.productos }}
-      {{ $cat := .categoria }}
-      <li class="item" data-cat="{{ .categoria }}" data-nombre="{{ .nombre | lower }}" data-titulo="{{ .nombre }}" data-opciones="{{ .opciones | jsonify }}">
-        {{ with .imagen }}
-        <img src="{{ partial "app/img.html" (dict "src" . "size" "160x160") }}" alt="" loading="lazy" />
-        {{ else }}
-        <span class="thumb">{{ range where $c.categorias "id" $cat }}{{ .icono }}{{ end }}</span>
-        {{ end }}
-        <div class="item-info">
-          {{ with .etiqueta }}<span class="tag">{{ . }}</span>{{ end }}
-          <h3>{{ .nombre }}</h3>
-          {{ range .opciones }}
-          <p><span>{{ .porcion }}</span><strong>{{ with .precio }}${{ . }}{{ else }}Consultar{{ end }}</strong></p>
-          {{ end }}
-        </div>
-        <button type="button" class="add" aria-label="Agregar {{ .nombre }} al pedido">
-          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        </button>
-      </li>
+  </section>
+
+  <!-- Categorías destacadas -->
+  {{ with $c.destacadas }}
+  <section class="wrap tiles" aria-label="Categorías">
+    {{ range . }}
+    <a class="tile" href="#catalogo" data-cat="{{ .categoria }}">
+      {{ with .imagen }}
+      <img src="{{ partial "app/img.html" (dict "src" . "size" "720x540") }}" alt="" loading="lazy" />
+      {{ else }}
+      {{ partial "app/art.html" .categoria }}
       {{ end }}
+      <span>{{ .titulo }}<i>{{ partial "app/icon.html" "flecha" }}</i></span>
+    </a>
+    {{ end }}
+  </section>
+  {{ end }}
+
+  <!-- Favoritos -->
+  {{ $favs := where $c.productos "favorito" true }}
+  {{ with $favs }}
+  <section class="wrap block" id="favoritos">
+    <div class="block-head">
+      {{ partial "app/icon.html" "hoja" }}
+      <h2>Favoritos hechos a mano</h2>
+      <span class="rule"></span>
+      <em class="script">Detalles que se sienten {{ partial "app/icon.html" "corazon" }}</em>
+    </div>
+    <ul class="grid">
+      {{ range . }}{{ partial "app/producto.html" . }}{{ end }}
     </ul>
-    <p class="empty" id="sin-resultados" hidden>No encontramos ese producto 🥲 — ¡escribinos y lo hacemos a medida!</p>
+  </section>
+  {{ end }}  
+
+  <!-- Catálogo completo -->
+  <section class="wrap block" id="catalogo">
+    <div class="block-head">
+      {{ partial "app/icon.html" "hoja" }}
+      <h2>Catálogo</h2>
+      <span class="rule"></span>
+      <span class="count" id="menu-count"></span>
+    </div>
+    <div class="toolbar">
+      <div class="chips" role="group" aria-label="Filtrar por categoría">
+        <button type="button" class="chip on" data-cat="todo">Todo</button>
+        {{ range $c.categorias }}<button type="button" class="chip" data-cat="{{ .id }}">{{ .nombre }}</button>{{ end }}
+      </div>
+      <form class="search" role="search" onsubmit="return false">
+        {{ partial "app/icon.html" "buscar" }}
+        <input type="search" id="buscar" placeholder="Buscar…" aria-label="Buscar productos" autocomplete="off" />
+      </form>
+      <label class="sort">
+        <select id="ordenar" aria-label="Ordenar por">
+          <option value="">Ordenar por</option>
+          <option value="az">A → Z</option>
+          <option value="za">Z → A</option>
+        </select>
+      </label>
+    </div>
+    <ul class="grid" id="lista">
+      {{ range $c.productos }}{{ partial "app/producto.html" . }}{{ end }}
+    </ul>
+    <p class="empty" id="sin-resultados" hidden>No encontramos ese producto — ¡escribinos y lo hacemos a medida!</p>
   </section>
 
   <!-- Galería -->
   {{ with $c.galeria }}
-  <section class="block" id="galeria">
-    <div class="block-head"><h2>Galería</h2></div>
-    <p class="lead">Cada vela está hecha a mano, con cera de soja y mucho cariño.</p>
+  <section class="wrap block" id="galeria">
+    <div class="block-head">{{ partial "app/icon.html" "hoja" }}<h2>Galería</h2><span class="rule"></span></div>
     <div class="gallery">
       {{ range . }}
       <button class="g-item" data-full="{{ partial "app/img.html" (dict "src" . "size" "1200x1600" "fit" true) }}" aria-label="Ampliar foto">
@@ -165,36 +192,60 @@
   {{ end }}
 
   <!-- Contacto -->
-  <section class="block contact" id="contacto">
-    <div class="block-head"><h2>Contacto</h2></div>
-    <p class="lead">Escribinos por WhatsApp para hacer tu pedido, elegir aromas o armar un regalo personalizado.</p>
-    <a class="wa-big" href="{{ $wa }}" target="_blank" rel="noopener">{{ partial "app/icon-wa.html" }} Escribir por WhatsApp</a>
-    <div class="socials">
-      {{ with $c.instagram }}<a href="{{ . }}" target="_blank" rel="noopener" class="ig">Instagram</a>{{ end }}
-      {{ with $c.tiktok }}<a href="{{ . }}" target="_blank" rel="noopener" class="tt">TikTok</a>{{ end }}
+  {{ $k := $c.contacto | default dict }}
+  <section class="wrap block contact" id="contacto">
+    <div class="block-head">
+      {{ partial "app/icon.html" "hoja" }}
+      <h2>Contacto</h2>
+      <span class="rule"></span>
+      <em class="script">Hablemos {{ partial "app/icon.html" "corazon" }}</em>
     </div>
-    <p class="muted">🌿 Cera de soja · 🖐️ Hechas a mano · 🎀 Empaquetado de regalo</p>
-    <p class="muted">📦 {{ $c.ubicacion }}</p>
+    <div class="contact-card">
+      <div class="contact-text">
+        <svg class="contact-sprig" viewBox="0 0 80 140" aria-hidden="true">
+          <path d="M6 136C22 100 40 60 74 6"/>
+          <path d="M17 108c-8-6-10-15-6-24 7 6 9 14 6 24zM17 108c9-1 16 2 20 9-9 2-16 0-20-9z"/>
+          <path d="M28 84c-7-7-8-16-3-24 7 6 8 15 3 24zM28 84c9-2 16 1 21 7-9 3-16 1-21-7z"/>
+          <path d="M41 61c-6-7-6-16-1-23 6 6 7 15 1 23zM41 61c9-2 16 0 21 6-9 4-16 2-21-6z"/>
+          <path d="M55 39c-5-7-5-15 0-22 6 6 6 14 0 22zM55 39c8-3 15-2 21 4-8 4-15 3-21-4z"/>
+        </svg>
+        {{ with $k.etiqueta }}<span class="contact-tag">{{ . }}</span>{{ end }}
+        <h2>{{ $k.titulo | default "¿Querés un regalo a medida?" }}</h2>
+        <p>{{ $k.texto | default "Escribinos por WhatsApp para hacer tu pedido, elegir aromas o armar un regalo personalizado." }}</p>
+        <div class="contact-actions">
+          <a class="btn contact-btn" href="{{ $wa }}" target="_blank" rel="noopener">{{ partial "app/icon-wa.html" }}<span>{{ $k.boton | default "Escribir por WhatsApp" }}</span>{{ partial "app/icon.html" "flecha" }}</a>
+          {{ if or $c.instagram $c.facebook $c.tiktok $c.email }}
+          <div class="socials">
+            <span>Seguinos en</span>
+            {{ with $c.instagram }}<a class="social" href="{{ . }}" target="_blank" rel="noopener" aria-label="Instagram">{{ partial "app/icon.html" "instagram" }}</a>{{ end }}
+            {{ with $c.facebook }}<a class="social" href="{{ . }}" target="_blank" rel="noopener" aria-label="Facebook">{{ partial "app/icon.html" "facebook" }}</a>{{ end }}
+            {{ with $c.tiktok }}<a class="txt" href="{{ . }}" target="_blank" rel="noopener">TikTok</a>{{ end }}
+            {{ with $c.email }}<a class="txt" href="mailto:{{ . }}">{{ . }}</a>{{ end }}
+          </div>
+          {{ end }}
+        </div>
+      </div>
+    </div>
   </section>
 
+  <!-- Beneficios 
+  <section class="perks" aria-label="Por qué elegirnos">
+    <ul class="wrap">
+      <li>{{ partial "app/icon.html" "hoja" }}<strong>Cera de soja</strong><small>Natural y ecológica</small></li>
+      <li>{{ partial "app/icon.html" "corazon" }}<strong>Hechas a mano</strong><small>Con mucho amor</small></li>
+      <li>{{ partial "app/icon.html" "regalo" }}<strong>Empaque para regalo</strong><small>Listo para sorprender</small>
+      </li>
+      <li>{{ partial "app/icon.html" "camion" }}<strong>Envíos en Uruguay</strong><small>A todo el país</small></li>
+    </ul>
+  </section>-->
+
+  <!-- Cierre -->
   <footer class="foot">
-    <p>©{{ now.Year }} {{ $c.nombre }} - Velas hechas con ❤️ y cera de soja</p>
+    <p class="foot-script">{{ partial "app/icon.html" "hoja" }}<span>Regalá calma<small>{{ partial "app/icon.html" "corazon" }}</small></span>{{ partial "app/icon.html" "hoja" }}</p>
+    <p>©{{ now.Year }} {{ $c.nombre }} · Velas hechas a mano con cera de soja</p>
     <p>Desarrollado por <strong>SoftNova</strong></p>
   </footer>
 </main>
-
-<!-- ===== Barra inferior ===== -->
-<nav class="tabbar" aria-label="Accesos rápidos">
-  <a href="#inicio" class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</a>
-  <a href="#menu"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM9 9h6M9 13h6M9 17h3"/></svg>Catálogo</a>
-  <button type="button" class="tab-cta" id="cart-open" aria-label="Ver mi pedido">{{ partial "app/icon-bag.html" }}<b class="cart-count" id="cart-count" hidden>0</b><span>Mi pedido</span></button>
-  {{ if $c.galeria }}
-  <a href="#galeria"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg>Galería</a>
-  {{ else }}
-  <a href="{{ $c.instagram }}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6"/></svg>Instagram</a>
-  {{ end }}
-  <a href="#contacto"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg>Contacto</a>
-</nav>
 
 <!-- Instrucciones para instalar a mano (iPhone, o Android si el navegador no muestra su aviso) -->
 <div class="install-sheet" id="install-sheet" hidden>
@@ -210,7 +261,7 @@
       <li>Elegí <strong>Instalar app</strong> o <strong>Agregar a pantalla principal</strong>.</li>
       <li>Confirmá con <strong>Instalar</strong>.</li>
     </ol>
-    <button type="button" class="pill" id="install-ok">Entendido</button>
+    <button type="button" class="btn" id="install-ok">Entendido</button>
   </div>
 </div>
 
@@ -228,13 +279,12 @@
   <div class="sheet-card cart-card" role="dialog" aria-modal="true" aria-labelledby="cart-title">
     <div class="cart-head">
       <h2 id="cart-title">Mi pedido</h2>
-      <button type="button" class="icon-btn" id="cart-close" aria-label="Cerrar">
-        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
-      </button>
+      <button type="button" class="icon-btn" id="cart-close" aria-label="Cerrar">{{ partial "app/icon.html" "cerrar" }}</button>
     </div>
-    <p class="cart-empty" id="cart-empty">Tu pedido está vacío 🕯️<br /><small>Tocá el <strong>+</strong> de un producto para agregarlo.</small></p>
+    <p class="cart-empty" id="cart-empty">Tu pedido está vacío<br /><small>Tocá <strong>Agregar</strong> en un producto para sumarlo.</small></p>
     <div id="cart-full" hidden>
       <ul class="cart-list" id="cart-list"></ul>
+      <template id="ico-basura">{{ partial "app/icon.html" "basura" }}</template>
       <div class="cart-total"><span>Total</span><strong id="cart-total"></strong></div>
       <p class="cart-note" id="cart-note" hidden>Los productos marcados "Consultar" se cotizan por mensaje.</p>
       <form class="cart-form" id="cart-form" onsubmit="return false">
@@ -247,9 +297,9 @@
         <label data-envio>Dirección y ciudad<input type="text" name="direccion" autocomplete="street-address" /></label>
         <label>Notas <small>(aroma, color, dedicatoria…)</small><textarea name="notas" rows="2"></textarea></label>
         <p class="cart-error" id="cart-error" hidden>Escribí tu nombre para enviar el pedido.</p>
-        <button type="button" class="wa-big" id="send-wa">{{ partial "app/icon-wa.html" }} Enviar por WhatsApp</button>
-        {{ with $c.email }}<button type="button" class="mail-btn" id="send-mail">✉️ Enviar por mail</button>{{ end }}
-        <button type="button" class="cart-clear" id="cart-clear">Vaciar pedido</button>
+        <button type="button" class="btn wa" id="send-wa">{{ partial "app/icon-wa.html" }} Enviar por WhatsApp</button>
+        {{ with $c.email }}<button type="button" class="mail-btn" id="send-mail">Enviar por mail</button>{{ end }}
+        <button type="button" class="cart-clear" id="cart-clear">{{ partial "app/icon.html" "basura" }} Vaciar pedido</button>
       </form>
     </div>
   </div>
@@ -258,9 +308,12 @@
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <!-- Visor de fotos -->
-<div class="lightbox" id="lightbox" hidden>
-  <button class="icon-btn" aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-  <img alt="Foto ampliada" />
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Foto ampliada" hidden>
+  <button class="icon-btn" aria-label="Cerrar">{{ partial "app/icon.html" "cerrar" }}</button>
+  <figure>
+    <img alt="" />
+    <figcaption hidden></figcaption>
+  </figure>
 </div>
 
 {{ $js := resources.Get "js/app.js" | resources.Minify | resources.Fingerprint }}
