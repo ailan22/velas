@@ -48,10 +48,17 @@ contacto:
   boton: "Armá tu regalo por WhatsApp"
 
 # Las tres tarjetas grandes debajo de la portada. "categoria" es el id de abajo.
-destacadas:
-  - { titulo: "Decorativas", categoria: decorativas, imagen: "fotos/mascotas.jpg" }
-  - { titulo: "Bouquets & flores", categoria: bouquet, imagen: "fotos/cat-bouquets.jpg" }
-  - { titulo: "Regalos especiales", categoria: regalo, imagen: "fotos/cat-regalos.jpg" }
+# Aromas que usamos (sección "Aromas"). imagen va en assets/images/; sin imagen se muestra
+# el emoji sobre el color. nota es opcional.
+aromas:
+  - { nombre: "Limón", imagen: "fotos/limon.png", nota: "Fresco y cítrico" }
+  - { nombre: "Vainilla", imagen: "fotos/vainilla.png", nota: "Dulce y cálido" }
+  - { nombre: "Frutilla", imagen: "fotos/frutilla.png", nota: "Frutal y dulce" }
+  - { nombre: "Durazno", imagen: "fotos/durazno.png", nota: "Suave y jugoso" }
+  - { nombre: "Lavanda", imagen: "fotos/lavanda.png", nota: "Relajante y floral" }
+  - { nombre: "Coco", imagen: "fotos/coco.png", nota: "Tropical y cremoso" }
+  - { nombre: "Canela", imagen: "fotos/canela.png", nota: "Especiado y acogedor" }
+  - { nombre: "Rosas", imagen: "fotos/rosas.png", nota: "Floral y romántico" }
 
 categorias:
   - id: frasco

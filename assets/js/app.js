@@ -63,7 +63,7 @@
   if ("IntersectionObserver" in window && !quieto) {
     var grupos = [
       ".hero-text > *",
-      ".tiles .tile",
+      ".aromas li",
       ".block-head",
       ".toolbar",
       ".grid .pcard",

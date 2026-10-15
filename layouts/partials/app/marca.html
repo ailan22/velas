@@ -1,0 +1,4 @@
+{{- /* Nombre de la marca con cada "i" dibujada como una velita encendida.
+       Recibe el nombre; los lectores de pantalla leen el texto original. */ -}}
+{{- $vela := `<svg class="vela-i" style="stroke: none" viewBox="0 0 10 32" aria-hidden="true"><path class="llama" d="M5 1C7.6 4.6 8 6.6 8 8a3 3 0 0 1-6 0c0-1.4.4-3.4 3-7z"/><path class="mecha" d="M5 10.5v2.5"/><rect class="cuerpo" x="2.6" y="13" width="4.8" height="19" rx="1.2"/></svg>` -}}
+<span class="marca"><span class="sr">{{ . }}</span><span aria-hidden="true">{{ delimit (split . "i") $vela | safeHTML }}</span></span>

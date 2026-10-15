@@ -34,12 +34,13 @@
     <a href="#inicio" class="brand">
       {{ partial "app/logo.html" "" }}
       <span>
-        <strong>{{ $c.nombre }}</strong>
+        <strong>{{ partial "app/marca.html" $c.nombre }}</strong>
         <small>{{ $c.subtitulo }}</small>
       </span>
     </a>
     <nav class="nav" aria-label="Principal">
       <a href="#inicio" class="on">Inicio</a>
+      <a href="#aromas">Aromas</a>
       <a href="#catalogo">Catálogo</a>
       <!-- <a href="#catalogo" data-cat="bouquet">Bouquets</a> -->
       <!-- <a href="#catalogo" data-cat="regalo">Regalos</a> -->
@@ -59,6 +60,7 @@
     <button class="icon-btn" id="menu-close" aria-label="Cerrar menú">{{ partial "app/icon.html" "cerrar" }}</button>
   </div>
   <a href="#inicio">Inicio</a>
+  <a href="#aromas">Aromas</a>
   <a href="#catalogo" data-cat="todo">Catálogo</a>
   {{ range $c.categorias }}<a href="#catalogo" class="sub" data-cat="{{ .id }}">{{ .nombre }}</a>{{ end }}
   {{ with $c.galeria }}<a href="#galeria">Galería</a>{{ end }}
@@ -112,23 +114,7 @@
         </div>
       </div>
     </div>
-  </section>
-
-  <!-- Categorías destacadas -->
-  {{ with $c.destacadas }}
-  <section class="wrap tiles" aria-label="Categorías">
-    {{ range . }}
-    <a class="tile" href="#catalogo" data-cat="{{ .categoria }}">
-      {{ with .imagen }}
-      <img src="{{ partial "app/img.html" (dict "src" . "size" "720x540") }}" alt="" loading="lazy" />
-      {{ else }}
-      {{ partial "app/art.html" .categoria }}
-      {{ end }}
-      <span>{{ .titulo }}<i>{{ partial "app/icon.html" "flecha" }}</i></span>
-    </a>
-    {{ end }}
-  </section>
-  {{ end }}
+  </section>  
 
   <!-- Favoritos -->
   {{ $favs := where $c.productos "favorito" true }}
@@ -144,7 +130,33 @@
       {{ range . }}{{ partial "app/producto.html" . }}{{ end }}
     </ul>
   </section>
-  {{ end }}  
+  {{ end }} 
+  
+  <!-- Aromas -->
+  {{ with $c.aromas }}
+  <section class="wrap block" id="aromas">
+    <div class="block-head">
+      {{ partial "app/icon.html" "hoja" }}
+      <h2>Aromas</h2>
+      <span class="rule"></span>
+      <em class="script">Elegí tu favorito {{ partial "app/icon.html" "corazon" }}</em>
+    </div>
+    <ul class="aromas">
+      {{ range . }}
+      <li>
+        <div class="aroma-img" style="--c: {{ .color | default "#EFEBE3" | safeCSS }}">
+          {{ with .imagen }}
+          <img src="{{ partial "app/img.html" (dict "src" . "size" "480x360") }}" alt="" loading="lazy" />
+          {{ else }}
+          <span aria-hidden="true">{{ .emoji }}</span>
+          {{ end }}
+        </div>
+        <span><strong>{{ .nombre }}</strong>{{ with .nota }}<small>{{ . }}</small>{{ end }}</span>
+      </li>
+      {{ end }}
+    </ul>
+  </section>
+  {{ end }}
 
   <!-- Catálogo completo -->
   <section class="wrap block" id="catalogo">
